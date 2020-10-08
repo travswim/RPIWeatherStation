@@ -1,5 +1,14 @@
+from time import sleep
 
 def voltage_to_direction(voltage: float) -> str:
+    """
+    Converts an anolog voltage to a direction
+
+    Arguments: None
+
+    Returns:
+        - Direction coresponding to an input voltage
+    """
     if voltage < 0.20625 or voltage > 3.09375:
         return "N"
     elif 0.20625 <= voltage < 0.61875:
@@ -12,10 +21,39 @@ def voltage_to_direction(voltage: float) -> str:
         return "SE"
 
     elif 1.44375 <= voltage < 1.85625:
+        return "S"
 
-def wind_direction():
+    elif 1.85625 <= voltage < 2.26875:
+        return "SW"
 
-    from time import sleep
+    elif 2.26875 <= voltage < 2.68125:
+        return "W"
+
+    else:
+        return "NW"
+
+
+def voltage_to_degrees(voltage: float) -> str:
+    """
+    Converts an anolog voltage to rotational degrees
+
+    Arguments: None
+
+    Returns:
+        - Degrees coresponding to an input voltage
+    """
+    return int(voltage*360/3.3)
+
+
+def voltage():
+    """
+    Gets the analog voltage from pin 0 on the MCP3008
+
+    Arguments: None
+
+    Returns:
+        - The analog voltage
+    """
     import busio
     import digitalio
     import board
@@ -33,15 +71,25 @@ def wind_direction():
     
     # create an analog input channel on pin 0
     chan = AnalogIn(mcp, MCP.P0)
-    while True:
-        print('Raw ADC Value: ', chan.value)
-        print('ADC Voltage: ' + str(chan.voltage) + 'V')
-        print()
-        sleep(2)
+
+    return chan
+    
         
 
 def main():
-    wind_direction()
+    """
+    Driver function
+    """
+    degree_sign= u'\N{DEGREE SIGN}'
+    chan = voltage()
+    while True:
+        print('Raw ADC Value: ', chan.value)
+        print('ADC Voltage: ' + str(chan.voltage) + 'V')
+        print('Direction: ' + voltage_to_direction(chan.voltage))
+        print('Direction: ' + str(voltage_to_degrees(chan.voltage)) + degree_sign)
+        print()
+        sleep(2)
+    
 
 if __name__ == '__main__':
     main()
