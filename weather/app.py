@@ -1,10 +1,12 @@
+# Dependencies
 import time
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from I2CDevices import BME280
+# Sensor connections
+from weather.sensors.RG11 import RG11
 
-# TODO: Python app file/folder structure
+# [x] TODO: Python app file/folder structure
 # TODO: Logging - python
 # TODO: Logging - GCP
 # TODO: Collect weather data
@@ -14,9 +16,10 @@ from I2CDevices import BME280
 
 
 
-def get_weather():
+def run():
     """
     
     """
-if __name__ == '__main__':
-    scheduler = BackgroundScheduler()
+    print("Hello World")
+# if __name__ == '__main__':
+#     scheduler = BackgroundScheduler()
