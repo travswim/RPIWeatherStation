@@ -32,7 +32,7 @@ def BME280():
     i2c = busio.I2C(board.SCL, board.SDA)
     bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c)
 
-    return bme280.temperature, bme280.humidity, bme280.pressure
+    return round(bme280.temperature,1), round(bme280.humidity, 2), round(bme280.pressure, 2)
 
 # TODO: Implement PM2.5 Air Quality Sensor when wired
 def PM25():

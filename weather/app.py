@@ -6,7 +6,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import threading
 from datetime import datetime
-# from Adafruit_IO import Client, Feed, RequestError
+from Adafruit_IO import Client, Feed, RequestError
 
 
 # Sensor connections
@@ -17,7 +17,7 @@ from weather.sensors.wind_direction import voltage, voltage_to_degrees, voltage_
 
 # Settings
 from weather.settings import get_env, internet
-from weather.services.adafruit_io import adafruit_io_startup
+
 
 # Global Variables
 global TEMERATURE_FEED
@@ -54,7 +54,7 @@ AIR_QUALITY_PM100 = "pm100"
 def reset_logs():
     fname = 'weather.log'
     with open(fname) as f:
-        for i, l in enumerate(f):
+        for i, _ in enumerate(f):
             pass
     del_lines = i+1
     a_file = open(fname, "r")
@@ -127,12 +127,12 @@ def run():
     scheduler = BackgroundScheduler()
     
     # Testing
-    scheduler.add_job(get_weather, 'cron', second=0)
-    scheduler.add_job(get_weather, 'cron', second=10)
-    scheduler.add_job(get_weather, 'cron', second=20)
-    scheduler.add_job(get_weather, 'cron', second=30)
-    scheduler.add_job(get_weather, 'cron', second=40)
-    scheduler.add_job(get_weather, 'cron', second=50)
+    # scheduler.add_job(get_weather, 'cron', second=0)
+    # scheduler.add_job(get_weather, 'cron', second=10)
+    # scheduler.add_job(get_weather, 'cron', second=20)
+    # scheduler.add_job(get_weather, 'cron', second=30)
+    # scheduler.add_job(get_weather, 'cron', second=40)
+    # scheduler.add_job(get_weather, 'cron', second=50)
 
     # Reset
     scheduler.add_job(reset_RG11, 'cron', hour=0)
@@ -148,7 +148,9 @@ def run():
     try:
         # This is here to simulate application activity (which keeps the main thread alive).
         ADAFRUIT_IO_KEY, ADAFRUIT_IO_USERNAME, LOCATION_LATITUDE, LOCATION_LONGITUDE, LOCATION_ELEVATION = get_env()
-        
+        # Create an instance of the REST client.
+        aio = Client(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
+        # location/elevation
         metadata = {'lat': LOCATION_LATITUDE,
                 'lon': LOCATION_LONGITUDE,
                 'ele': LOCATION_ELEVATION,
@@ -172,10 +174,10 @@ def run():
 
         # pressure
         try:
-            presssure = aio.feeds(PRESSURE_FEED)
+            pressure = aio.feeds(PRESSURE_FEED)
         except RequestError: # Doesn't exist, create a new feed
             feed = Feed(name=PRESSURE_FEED)
-            presssure = aio.create_feed(feed)
+            pressure = aio.create_feed(feed)
 
         # rainfall
         try:
@@ -186,10 +188,10 @@ def run():
 
         # windspeed
         try:
-            windspeed = aio.feeds(WINDSPEED_FEED)
+            wind_speed = aio.feeds(WINDSPEED_FEED)
         except RequestError: # Doesn't exist, create a new feed
             feed = Feed(name=WINDSPEED_FEED)
-            windspeed = aio.create_feed(feed)
+            wind_speed = aio.create_feed(feed)
 
         # winddirection
         try:
@@ -200,41 +202,62 @@ def run():
 
         # Air quality pm1.0
         try:
-            pm10 = aio.feeds(AIR_QUALITY_PM10)
+            aq_pm10 = aio.feeds(AIR_QUALITY_PM10)
         except RequestError: # Doesn't exist, create a new feed
             feed = Feed(name=AIR_QUALITY_PM10)
-            pm10 = aio.create_feed(feed)
+            aq_pm10 = aio.create_feed(feed)
         
         # Air quality pm2.5
         try:
-            pm25 = aio.feeds(AIR_QUALITY_PM25)
+            aq_pm25 = aio.feeds(AIR_QUALITY_PM25)
         except RequestError: # Doesn't exist, create a new feed
             feed = Feed(name=AIR_QUALITY_PM25)
-            pm25 = aio.create_feed(feed)
+            aq_pm25 = aio.create_feed(feed)
 
         # Air quality pm10.0
         try:
-            pm100 = aio.feeds(AIR_QUALITY_PM100)
+            aq_pm100 = aio.feeds(AIR_QUALITY_PM100)
         except RequestError: # Doesn't exist, create a new feed
             feed = Feed(name=AIR_QUALITY_PM100)
-            pm100 = aio.create_feed(feed)
+            aq_pm100 = aio.create_feed(feed)
 
         while True:
-            sleep(2)
             
+            print("Sent Data: 9 data points")
+            # SENSOR READINGS
+            try:
+                # Temperature, humidity, pressure
+                temp, hum, press = BME280()
+                
+                aio.send_data(temperature.key, temp, metadata)
+                aio.send_data(humidity.key, hum, metadata)
+                aio.send_data(pressure.key, press, metadata)
+
+                # Air quality
+                pm10, pm25, pm100 = PM25()
+                aio.send_data(aq_pm10.key, pm10, metadata)
+                aio.send_data(aq_pm25.key, pm25, metadata)
+                aio.send_data(aq_pm100.key, pm100, metadata)
+
+                # Wind direction
+                chan = voltage()
+                aio.send_data(winddirection.key, voltage_to_direction(chan.voltage), metadata)
+
+                # Wind speed
+                ws, _, _ = get_wind_speed()
+                aio.send_data(wind_speed.key, ws, metadata)
+
+                # Rainfall
+                get_RG11()
+                aio.send_data(rainfall.key, get_RG11(), metadata)
+            except:
+                logging.warning("Reached data limit. Wating for 1min")
+                sleep(60)
+
+            sleep(20)
 
 
-            
-            
-            while True:
-                value = randint(0, 50)
-                # Set metadata associated with value
-                metadata = {'lat': 40.726190,
-                        'lon': -74.005334,
-                        'ele': -6,
-                        'created_at': None}
-                aio.send_data(temperature.key, value, metadata)
-                sleep(2)
+               
     except (KeyboardInterrupt, SystemExit):
         # Not strictly necessary if daemonic mode is enabled but should be done if possible
         scheduler.shutdown() 
