@@ -13,6 +13,8 @@ from weather.sensors.wind_speed import anemometer, get_wind_speed, reset_wind_sp
 from weather.sensors.wind_direction import voltage, voltage_to_degrees, voltage_to_direction
 
 # [x] TODO: Python app file/folder structure
+# [ ] TODO: Logging - Adafruit IO
+# [ ] TODO: Integrate PM2.5 Sensor readings
 # [ ] TODO: Logging - python
 # [ ] TODO: Logging - GCP
 # [x] TODO: Collect weather data
