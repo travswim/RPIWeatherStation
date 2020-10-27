@@ -42,13 +42,13 @@ AIR_QUALITY_PM25 = "pm25"
 AIR_QUALITY_PM100 = "pm100"
 
 # [x] TODO: Python app file/folder structure
-# [ ] TODO: Integrate PM2.5 Sensor readings
+# [x] TODO: Integrate PM2.5 Sensor readings
 # [ ] TODO: Logging - python
-# [ ] TODO: Logging - GCP
+# [ ] TODO: Error handling
 # [x] TODO: Collect weather data
-# [ ] TODO: Schedule every 15min
-# [ ] TODO: Reset Rainfall counter
-# [ ] TODO: Reset windspeed
+# [x] TODO: Schedule every 20s
+# [x] TODO: Reset Rainfall counter
+# [x] TODO: Reset windspeed
 # [ ] TODO: Fix fritzing diagrams for perf board
 
 def reset_logs():
