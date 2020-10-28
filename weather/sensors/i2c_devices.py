@@ -1,8 +1,10 @@
 from time import sleep
+from datetime import datetime
 import busio
 import board
+import logging
 
-# TODO: VEML UV Sensor will be incorporated when houseing is available
+# [ ] TODO: VEML UV Sensor will be incorporated when houseing is available
 # def VEML():
 #     """
 #     Gets the raw UV and level UV from the VEML6070
@@ -31,7 +33,7 @@ def BME280():
     # Create library object using our Bus I2C ports
     i2c = busio.I2C(board.SCL, board.SDA)
     bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c)
-
+    logging.info("[{}] Got BME280 sensor data".format(datetime.now()))
     return round(bme280.temperature,1), round(bme280.humidity, 2), round(bme280.pressure, 2)
 
 # TODO: Implement PM2.5 Air Quality Sensor when wired
@@ -47,7 +49,7 @@ def PM25():
 
     try:
         aqdata = pm25.read()
-        # print(aqdata)
+        logging.info("[{}] GOT PM2.5 sensor data".format(datetime.now()))
     except RuntimeError:
         print("Unable to read from sensor, retrying...")
     

@@ -1,5 +1,7 @@
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 from time import sleep
+import logging
+from datetime import datetime
 count = 0
 
 def get_RG11() -> float:
@@ -22,6 +24,7 @@ def reset_RG11():
     """
     global count
     count = 0
+    logging.info("[{}] Reset RG11".format(datetime.now()))
 
 def button_callback(channel):
     """
@@ -45,8 +48,9 @@ def RG11():
     GPIO.setmode(GPIO.BCM)
     # GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
     GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 10 to be an input pin and set initial value to be pulled low (off)
-    GPIO.add_event_detect(15, GPIO.FALLING, callback=button_callback, bouncetime=115) # Setup event on pin 10 rising edge
-
+    # GPIO.add_event_detect(15, GPIO.FALLING, callback=button_callback, bouncetime=115) # Setup event on pin 10 rising edge - Debounce set for internal testing
+    GPIO.add_event_detect(15, GPIO.FALLING, callback=button_callback) # Setup event on pin 10 rising edge
+    
     while True:
         sleep(3)
 

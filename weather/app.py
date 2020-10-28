@@ -125,14 +125,6 @@ def run():
 
 
     scheduler = BackgroundScheduler()
-    
-    # Testing
-    # scheduler.add_job(get_weather, 'cron', second=0)
-    # scheduler.add_job(get_weather, 'cron', second=10)
-    # scheduler.add_job(get_weather, 'cron', second=20)
-    # scheduler.add_job(get_weather, 'cron', second=30)
-    # scheduler.add_job(get_weather, 'cron', second=40)
-    # scheduler.add_job(get_weather, 'cron', second=50)
 
     # Reset
     scheduler.add_job(reset_RG11, 'cron', hour=0)
@@ -221,10 +213,10 @@ def run():
             feed = Feed(name=AIR_QUALITY_PM100)
             aq_pm100 = aio.create_feed(feed)
 
+        logging.info("[{}] Connection to Adafruit IO established".format(datetime.now()))
         while True:
-            
-            print("Sent Data: 9 data points")
-            # SENSOR READINGS
+
+            # SENSOR READINGS: Send data to feeds
             try:
                 # Temperature, humidity, pressure
                 temp, hum, press = BME280()
@@ -250,6 +242,7 @@ def run():
                 # Rainfall
                 get_RG11()
                 aio.send_data(rainfall.key, get_RG11(), metadata)
+                logging.info("[{}] Sensor data sent to feeds".format(datetime.now()))
             except:
                 logging.warning("Reached data limit. Wating for 1min")
                 sleep(60)
