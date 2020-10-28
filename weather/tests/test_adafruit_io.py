@@ -1,6 +1,7 @@
 from Adafruit_IO import Client, Feed, RequestError
 from dotenv import load_dotenv
 import unittest
+import os
 from random import randint
 
 class Test_TestAdafruitIO(unittest.TestCase):
@@ -9,7 +10,7 @@ class Test_TestAdafruitIO(unittest.TestCase):
 
         KEY = os.getenv("ADAFRUIT_IO_KEY")
         USERNAME = os.getenv("ADAFRUIT_IO_USERNAME")
-        aio = Client(username, key)
+        aio = Client(USERNAME, KEY)
 
         try:
             test = aio.feeds("test")
