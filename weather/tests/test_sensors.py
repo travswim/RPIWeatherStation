@@ -1,7 +1,7 @@
 from weather.sensors.i2c_devices import BME280, PM25
-# from weather.sensors.wind_direction import voltage, voltage_to_degrees, voltage_to_direction
-# from weather.sensors.wind_speed import button_callback, rotations
-# from weather.sensors.RG11 import button_callback as bs, count
+from weather.sensors.wind_direction import voltage, voltage_to_degrees, voltage_to_direction
+from weather.sensors.wind_speed import button_callback, rotations
+from weather.sensors.RG11 import button_callback as bs, count
 
 import RPi.GPIO as GPIO
 import unittest
