@@ -7,4 +7,4 @@ sudo apt install python3-pip
 
 pip3 install -r requirements.txt
 
-python3 -m weather
+nohup python3 -m weather &
