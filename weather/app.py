@@ -247,7 +247,7 @@ def run():
                 logging.warning("Reached data limit. Wating for 1min")
                 sleep(60)
 
-            sleep(20)
+            sleep(60)
 
 
                
