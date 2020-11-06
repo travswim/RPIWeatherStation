@@ -1,6 +1,7 @@
 # Dependencies
 from time import sleep
 import os
+import sys
 from apscheduler.schedulers.background import BackgroundScheduler
 import logging
 from logging.handlers import RotatingFileHandler
@@ -244,8 +245,8 @@ def run():
                 aio.send_data(rainfall.key, get_RG11(), metadata)
                 logging.info("[{}] Sensor data sent to feeds".format(datetime.now()))
             except:
-                logging.warning("Reached data limit. Wating for 1min")
-                sleep(60)
+                logging.warning("Something went wrong")
+                sys.exit()
 
             sleep(60)
 
