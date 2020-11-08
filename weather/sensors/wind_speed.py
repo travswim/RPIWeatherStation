@@ -47,7 +47,7 @@ def button_callback(channel):
     global rotations
     rotations += 1
 
-def anemometer():
+def anemometer(avg_sampling_time: int = 60) -> None:
     """
     Calculates the anemometer wind speed
 
@@ -72,8 +72,8 @@ def anemometer():
         global wind_speed
 
         rotations = 0
-        sleep(3)
-        wind_speed = round(rotations*0.75*1.609344, 2)
+        sleep(avg_sampling_time)
+        wind_speed = round(rotations*2.25*1.609344/avg_sampling_time, 2)
 
         if wind_speed > max_wind_speed:
             max_wind_speed = wind_speed

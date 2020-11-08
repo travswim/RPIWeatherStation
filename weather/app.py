@@ -18,7 +18,7 @@ from weather.sensors.wind_direction import voltage, voltage_to_degrees, voltage_
 
 # Settings
 from weather.settings import get_env, internet
-
+from weather.services.adafruit_io_connect import create_feed_connection
 
 # Global Variables
 global TEMERATURE_FEED
@@ -41,6 +41,7 @@ WINDDIRECTION_FEED = "winddirection"
 AIR_QUALITY_PM10 = "pm10"
 AIR_QUALITY_PM25 = "pm25"
 AIR_QUALITY_PM100 = "pm100"
+REFRESH_RATE = 30
 
 # [x] TODO: Python app file/folder structure
 # [x] TODO: Integrate PM2.5 Sensor readings
@@ -112,7 +113,7 @@ def run():
     # Check internet connection
     while not internet():
         logging.error("[{}] No internet connection".format(datetime.now()))
-        sleep(10)
+        sleep(60)
     logging.info("[{}] Connected to internet".format(datetime.now()))
     # Start monitoring rainfall from the RG11
     run_RG11 = threading.Thread(target=RG11, name="RG11", daemon=True)
@@ -120,7 +121,7 @@ def run():
     logging.info("[{}] Started RG11".format(datetime.now()))
 
     # Start monitoring the wind speed from the anemometer
-    run_anemometer = threading.Thread(target=anemometer, name="Anemometer", daemon=True)
+    run_anemometer = threading.Thread(target=anemometer, name="Anemometer", args=[30], daemon=True)
     run_anemometer.start()
     logging.info("[{}] Started anemometer wind speed".format(datetime.now()))
 
@@ -135,35 +136,37 @@ def run():
     scheduler.start()
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
     
-    
+    # This is here to simulate application activity (which keeps the main thread alive).
+    ADAFRUIT_IO_KEY, ADAFRUIT_IO_USERNAME, LOCATION_LATITUDE, LOCATION_LONGITUDE, LOCATION_ELEVATION = get_env()
+    # Create an instance of the REST client.
+    aio = Client(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
+    # location/elevation
+    metadata = {'lat': LOCATION_LATITUDE,
+            'lon': LOCATION_LONGITUDE,
+            'ele': LOCATION_ELEVATION,
+            'created_at': None}
 
 
     try:
-        # This is here to simulate application activity (which keeps the main thread alive).
-        ADAFRUIT_IO_KEY, ADAFRUIT_IO_USERNAME, LOCATION_LATITUDE, LOCATION_LONGITUDE, LOCATION_ELEVATION = get_env()
-        # Create an instance of the REST client.
-        aio = Client(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
-        # location/elevation
-        metadata = {'lat': LOCATION_LATITUDE,
-                'lon': LOCATION_LONGITUDE,
-                'ele': LOCATION_ELEVATION,
-                'created_at': None}
+        
 
         # STARTUP CONNECTION TO ADAFRUIT IO
 
         # temperature
-        try:
-            temperature = aio.feeds(TEMERATURE_FEED)
-        except RequestError: # Doesn't exist, create a new feed
-            feed = Feed(name=TEMERATURE_FEED)
-            temperature = aio.create_feed(feed)
+        create_feed_connection(aio, TEMERATURE_FEED)
+        # try:
+        #     temperature = aio.feeds(TEMERATURE_FEED)
+        # except RequestError: # Doesn't exist, create a new feed
+        #     feed = Feed(name=TEMERATURE_FEED)
+        #     temperature = aio.create_feed(feed)
         
         # humidity
-        try:
-            humidity = aio.feeds(HUMIDITY_FEED)
-        except RequestError: # Doesn't exist, create a new feed
-            feed = Feed(name=HUMIDITY_FEED)
-            humidity = aio.create_feed(feed)
+        create_feed_connection(aio, HUMIDITY_FEED)
+        # try:
+        #     humidity = aio.feeds(HUMIDITY_FEED)
+        # except RequestError: # Doesn't exist, create a new feed
+        #     feed = Feed(name=HUMIDITY_FEED)
+        #     humidity = aio.create_feed(feed)
 
         # pressure
         try:
