@@ -7,7 +7,7 @@ ExecStart=/usr/bin/python3 -m weather
 WorkingDirectory=/home/pi/RPIWeatherStation
 StandardOutput=inherit
 StandardError=inherit
-Restart=on-failure
+Restart=always
 User=pi
 
 [Install]
