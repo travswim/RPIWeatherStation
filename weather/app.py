@@ -265,18 +265,22 @@ def run():
 
     logging.info("[{}] Connection to Adafruit IO established".format(datetime.now()))
 
+    
+    scheduler = BackgroundScheduler()
+
+    # Reset functions
+    scheduler.add_job(reset_RG11, 'cron', hour=0)
+    scheduler.add_job(reset_wind_speed, 'cron', hour=0)
+    scheduler.add_job(reset_logs, 'cron', hour=0)
+    scheduler.add_job(send_feed_data, 'cron', [aio, metadata,temperature, humidity, pressure, rainfall, wind_speed, wind_direction, aq_pm10, aq_pm25, aq_pm100], minute=0)
+
+    scheduler.start()
+    print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
+
     try:
-        scheduler = BackgroundScheduler()
-
-        # Reset functions
-        scheduler.add_job(reset_RG11, 'cron', hour=0)
-        scheduler.add_job(reset_wind_speed, 'cron', hour=0)
-        scheduler.add_job(reset_logs, 'cron', hour=0)
-        scheduler.add_job(send_feed_data, 'cron', [aio, metadata,temperature, humidity, pressure, rainfall, wind_speed, wind_direction, aq_pm10, aq_pm25, aq_pm100], hour=0)
-
-        scheduler.start()
-        print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
-
+        while True:
+            sleep(5)
+    
     except (KeyboardInterrupt, SystemExit):
         # Not strictly necessary if daemonic mode is enabled but should be done if possible
         scheduler.shutdown()
