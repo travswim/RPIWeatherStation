@@ -12,6 +12,7 @@ def get_RG11() -> float:
 
     Returns: The amount of water fallen in mm
     """
+    logging.info("[{}] Got RG11 data".format(datetime.now()))
     return round(count*0.2, 2)
 
 def reset_RG11():

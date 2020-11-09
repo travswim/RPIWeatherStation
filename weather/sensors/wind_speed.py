@@ -1,5 +1,6 @@
 from time import sleep
-
+from datetime import datetime
+import logging
 # Global Vars
 wind_speed = 0
 max_wind_speed = float('-inf')
@@ -18,7 +19,7 @@ def get_wind_speed():
     global wind_speed
     global max_wind_speed
     global min_wind_speed
-
+    logging.info("[{}] Got wind speed RG11".format(datetime.now()))
     return round(wind_speed,2), round(max_wind_speed, 2), round(min_wind_speed,2)
 
 def reset_wind_speed():

@@ -73,8 +73,40 @@ def reset_logs():
 
     new_file.close()
 
+def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Feed, pressure: Feed, rainfall: Feed, wind_speed: Feed, wind_direction: Feed, aq_pm10: Feed, aq_pm25: Feed, aq_pm100: Feed) -> None:
+    # SENSOR READINGS: Send data to feeds
+    try:
+        # Temperature, humidity, pressure
+        temp, hum, press = BME280()
+        
+        aio.send_data(temperature.key, temp, metadata)
+        aio.send_data(humidity.key, hum, metadata)
+        aio.send_data(pressure.key, press, metadata)
 
-def get_weather():
+        # Air quality
+        pm10, pm25, pm100 = PM25()
+        aio.send_data(aq_pm10.key, pm10, metadata)
+        aio.send_data(aq_pm25.key, pm25, metadata)
+        aio.send_data(aq_pm100.key, pm100, metadata)
+
+        # Wind direction
+        chan = voltage()
+        aio.send_data(wind_direction.key, voltage_to_direction(chan.voltage), metadata)
+
+        # Wind speed
+        ws, _, _ = get_wind_speed()
+        aio.send_data(wind_speed.key, ws, metadata)
+
+        # Rainfall
+        get_RG11()
+        aio.send_data(rainfall.key, get_RG11(), metadata)
+        logging.info("[{}] Sensor data sent to feeds".format(datetime.now()))
+    except:
+        logging.error("Could not send data to Adafruit IO. Exiting System")
+        sys.exit(1)
+
+
+def print_weather():
     # Get temperature, humidity, pressureasd
     temperature, humidity, pressure = BME280()
     print("\nTemperature: %0.1f C" % temperature)
@@ -115,153 +147,141 @@ def run():
         logging.error("[{}] No internet connection".format(datetime.now()))
         sleep(60)
     logging.info("[{}] Connected to internet".format(datetime.now()))
+
     # Start monitoring rainfall from the RG11
-    run_RG11 = threading.Thread(target=RG11, name="RG11", daemon=True)
-    run_RG11.start()
-    logging.info("[{}] Started RG11".format(datetime.now()))
+    try:
+        run_RG11 = threading.Thread(target=RG11, name="RG11", daemon=True)
+        run_RG11.start()
+        logging.info("[{}] Started RG11".format(datetime.now()))
+    except:
+        logging.error("Could not start RG11")
+        sys.exit(1)
 
     # Start monitoring the wind speed from the anemometer
-    run_anemometer = threading.Thread(target=anemometer, name="Anemometer", args=[30], daemon=True)
-    run_anemometer.start()
-    logging.info("[{}] Started anemometer wind speed".format(datetime.now()))
+    try:
+        run_anemometer = threading.Thread(target=anemometer, name="Anemometer", args=[30], daemon=True)
+        run_anemometer.start()
+        logging.info("[{}] Started anemometer wind speed".format(datetime.now()))
+    except:
+        logging.error("Could not start anemometer wind speed")
+        sys.exit(1)
 
 
-    scheduler = BackgroundScheduler()
-
-    # Reset
-    scheduler.add_job(reset_RG11, 'cron', hour=0)
-    scheduler.add_job(reset_wind_speed, 'cron', hour=0)
-    scheduler.add_job(reset_logs, 'cron', hour=0)
     
-    scheduler.start()
-    print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
     
-    # This is here to simulate application activity (which keeps the main thread alive).
+    # Get environment parameters
     ADAFRUIT_IO_KEY, ADAFRUIT_IO_USERNAME, LOCATION_LATITUDE, LOCATION_LONGITUDE, LOCATION_ELEVATION = get_env()
+    
     # Create an instance of the REST client.
-    aio = Client(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
+    try:
+        aio = Client(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
+        logging.info("[{}] Connection to Adafruit IO established".format(datetime.now()))
+
+    except:
+        # Failing gracefully
+        logging.info("[{}] Failed to connect to Adafruit IO".format(datetime.now()))
+        sys.exit(1)
+
     # location/elevation
     metadata = {'lat': LOCATION_LATITUDE,
             'lon': LOCATION_LONGITUDE,
             'ele': LOCATION_ELEVATION,
             'created_at': None}
+  
 
+    # STARTUP CONNECTION TO ADAFRUIT IO Feeds
+
+    # temperature
+    temperature = create_feed_connection(aio, TEMERATURE_FEED)
+    # try:
+    #     temperature = aio.feeds(TEMERATURE_FEED)
+    # except RequestError: # Doesn't exist, create a new feed
+    #     feed = Feed(name=TEMERATURE_FEED)
+    #     temperature = aio.create_feed(feed)
+    
+    # humidity
+    humidity = create_feed_connection(aio, HUMIDITY_FEED)
+    # try:
+    #     humidity = aio.feeds(HUMIDITY_FEED)
+    # except RequestError: # Doesn't exist, create a new feed
+    #     feed = Feed(name=HUMIDITY_FEED)
+    #     humidity = aio.create_feed(feed)
+
+    # pressure
+    pressure = create_feed_connection(aio, PRESSURE_FEED)
+    # try:
+    #     pressure = aio.feeds(PRESSURE_FEED)
+    # except RequestError: # Doesn't exist, create a new feed
+    #     feed = Feed(name=PRESSURE_FEED)
+    #     pressure = aio.create_feed(feed)
+
+    # rainfall
+    rainfall = create_feed_connection(aio, RAINFALL_FEED)
+    # try:
+    #     rainfall = aio.feeds(RAINFALL_FEED)
+    # except RequestError: # Doesn't exist, create a new feed
+    #     feed = Feed(name=RAINFALL_FEED)
+    #     rainfall = aio.create_feed(feed)
+
+    # windspeed
+    wind_speed = create_feed_connection(aio, WINDSPEED_FEED)
+    # try:
+    #     wind_speed = aio.feeds(WINDSPEED_FEED)
+    # except RequestError: # Doesn't exist, create a new feed
+    #     feed = Feed(name=WINDSPEED_FEED)
+    #     wind_speed = aio.create_feed(feed)
+
+    # winddirection
+    wind_direction = create_feed_connection(aio, WINDDIRECTION_FEED)
+    # try:
+    #     winddirection = aio.feeds(WINDDIRECTION_FEED)
+    # except RequestError: # Doesn't exist, create a new feed
+    #     feed = Feed(name=WINDDIRECTION_FEED)
+        # winddirection = aio.create_feed(feed)
+
+    # Air quality pm1.0
+    aq_pm10 = create_feed_connection(aio, AIR_QUALITY_PM10)
+    # try:
+    #     aq_pm10 = aio.feeds(AIR_QUALITY_PM10)
+    # except RequestError: # Doesn't exist, create a new feed
+    #     feed = Feed(name=AIR_QUALITY_PM10)
+    #     aq_pm10 = aio.create_feed(feed)
+    
+    # Air quality pm2.5
+    aq_pm25 = create_feed_connection(aio, AIR_QUALITY_PM25)
+    # try:
+    #     aq_pm25 = aio.feeds(AIR_QUALITY_PM25)
+    # except RequestError: # Doesn't exist, create a new feed
+    #     feed = Feed(name=AIR_QUALITY_PM25)
+    #     aq_pm25 = aio.create_feed(feed)
+
+    # Air quality pm10.0
+    aq_pm100 = create_feed_connection(aio, AIR_QUALITY_PM100)
+    # try:
+    #     aq_pm100 = aio.feeds(AIR_QUALITY_PM100)
+    # except RequestError: # Doesn't exist, create a new feed
+    #     feed = Feed(name=AIR_QUALITY_PM100)
+    #     aq_pm100 = aio.create_feed(feed)
+
+    logging.info("[{}] Connection to Adafruit IO established".format(datetime.now()))
 
     try:
-        
+        scheduler = BackgroundScheduler()
 
-        # STARTUP CONNECTION TO ADAFRUIT IO
+        # Reset functions
+        scheduler.add_job(reset_RG11, 'cron', hour=0)
+        scheduler.add_job(reset_wind_speed, 'cron', hour=0)
+        scheduler.add_job(reset_logs, 'cron', hour=0)
+        scheduler.add_job(send_feed_data, 'cron', [aio, metadata,temperature, humidity, pressure, rainfall, wind_speed, wind_direction, aq_pm10, aq_pm25, aq_pm100], hour=0)
 
-        # temperature
-        create_feed_connection(aio, TEMERATURE_FEED)
-        # try:
-        #     temperature = aio.feeds(TEMERATURE_FEED)
-        # except RequestError: # Doesn't exist, create a new feed
-        #     feed = Feed(name=TEMERATURE_FEED)
-        #     temperature = aio.create_feed(feed)
-        
-        # humidity
-        create_feed_connection(aio, HUMIDITY_FEED)
-        # try:
-        #     humidity = aio.feeds(HUMIDITY_FEED)
-        # except RequestError: # Doesn't exist, create a new feed
-        #     feed = Feed(name=HUMIDITY_FEED)
-        #     humidity = aio.create_feed(feed)
+        scheduler.start()
+        print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
 
-        # pressure
-        try:
-            pressure = aio.feeds(PRESSURE_FEED)
-        except RequestError: # Doesn't exist, create a new feed
-            feed = Feed(name=PRESSURE_FEED)
-            pressure = aio.create_feed(feed)
-
-        # rainfall
-        try:
-            rainfall = aio.feeds(RAINFALL_FEED)
-        except RequestError: # Doesn't exist, create a new feed
-            feed = Feed(name=RAINFALL_FEED)
-            rainfall = aio.create_feed(feed)
-
-        # windspeed
-        try:
-            wind_speed = aio.feeds(WINDSPEED_FEED)
-        except RequestError: # Doesn't exist, create a new feed
-            feed = Feed(name=WINDSPEED_FEED)
-            wind_speed = aio.create_feed(feed)
-
-        # winddirection
-        try:
-            winddirection = aio.feeds(WINDDIRECTION_FEED)
-        except RequestError: # Doesn't exist, create a new feed
-            feed = Feed(name=WINDDIRECTION_FEED)
-            winddirection = aio.create_feed(feed)
-
-        # Air quality pm1.0
-        try:
-            aq_pm10 = aio.feeds(AIR_QUALITY_PM10)
-        except RequestError: # Doesn't exist, create a new feed
-            feed = Feed(name=AIR_QUALITY_PM10)
-            aq_pm10 = aio.create_feed(feed)
-        
-        # Air quality pm2.5
-        try:
-            aq_pm25 = aio.feeds(AIR_QUALITY_PM25)
-        except RequestError: # Doesn't exist, create a new feed
-            feed = Feed(name=AIR_QUALITY_PM25)
-            aq_pm25 = aio.create_feed(feed)
-
-        # Air quality pm10.0
-        try:
-            aq_pm100 = aio.feeds(AIR_QUALITY_PM100)
-        except RequestError: # Doesn't exist, create a new feed
-            feed = Feed(name=AIR_QUALITY_PM100)
-            aq_pm100 = aio.create_feed(feed)
-
-        logging.info("[{}] Connection to Adafruit IO established".format(datetime.now()))
-        while True:
-
-            # SENSOR READINGS: Send data to feeds
-            try:
-                # Temperature, humidity, pressure
-                temp, hum, press = BME280()
-                
-                aio.send_data(temperature.key, temp, metadata)
-                aio.send_data(humidity.key, hum, metadata)
-                aio.send_data(pressure.key, press, metadata)
-
-                # Air quality
-                pm10, pm25, pm100 = PM25()
-                aio.send_data(aq_pm10.key, pm10, metadata)
-                aio.send_data(aq_pm25.key, pm25, metadata)
-                aio.send_data(aq_pm100.key, pm100, metadata)
-
-                # Wind direction
-                chan = voltage()
-                aio.send_data(winddirection.key, voltage_to_direction(chan.voltage), metadata)
-
-                # Wind speed
-                ws, _, _ = get_wind_speed()
-                aio.send_data(wind_speed.key, ws, metadata)
-
-                # Rainfall
-                get_RG11()
-                aio.send_data(rainfall.key, get_RG11(), metadata)
-                logging.info("[{}] Sensor data sent to feeds".format(datetime.now()))
-            except:
-                logging.warning("Something went wrong")
-                sys.exit()
-
-            sleep(60)
-
-
-               
     except (KeyboardInterrupt, SystemExit):
         # Not strictly necessary if daemonic mode is enabled but should be done if possible
-        scheduler.shutdown() 
+        scheduler.shutdown()
+        logging.error("Scheduled job failed, exiting with status code 1")
+        sys.exit(1)
 
     
 
-    
-
-# if __name__ == '__main__':
-#     reset_logs()

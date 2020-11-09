@@ -1,5 +1,6 @@
 from time import sleep
-
+from datetime import datetime
+import logging
 def voltage_to_direction(voltage: float) -> str:
     """
     Converts an anolog voltage to a direction
@@ -71,7 +72,7 @@ def voltage():
     
     # create an analog input channel on pin 0
     chan = AnalogIn(mcp, MCP.P0)
-
+    logging.info("[{}] Got wind direction data".format(datetime.now()))
     return chan
     
         
