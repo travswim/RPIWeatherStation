@@ -53,7 +53,14 @@ REFRESH_RATE = 30
 # [x] TODO: Reset windspeed
 # [ ] TODO: Fix fritzing diagrams for perf board
 
-def reset_logs():
+def reset_logs() -> None:
+    """
+    Deletest 1/2 the log data to ensure that the file does not get too large
+
+    Arguments: None
+
+    Returns: None
+    """
     fname = 'weather.log'
     with open(fname) as f:
         for i, _ in enumerate(f):
@@ -74,6 +81,26 @@ def reset_logs():
     new_file.close()
 
 def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Feed, pressure: Feed, rainfall: Feed, wind_speed: Feed, wind_direction: Feed, aq_pm10: Feed, aq_pm25: Feed, aq_pm100: Feed) -> None:
+    """
+    Sends collected sensor data to their respective Adafruit IO feeds
+
+    Arguments:
+        - aio: The Adafruit IO client connection
+        - metadata: The location metadata to be sent with each data point
+        - temperature: the temperature feed
+        - humidity: the humidity feed
+        - pressure: the pressure feed
+        - rainfall: the rainfall feed
+        - wind_speed: the wind_speed feed
+        - wind_direction: the wind_direction feed
+        - aq_pm10: the air quality 1.0um index feed
+        - aq_pm25: the air quality 2.5um index feed
+        - aq_pm100: the air quality 10.0um index feed
+
+    Returns: None
+      
+    """
+
     # SENSOR READINGS: Send data to feeds
     try:
         # Temperature, humidity, pressure
@@ -106,7 +133,14 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
         sys.exit(1)
 
 
-def print_weather():
+def print_weather() -> None:
+    """
+    Helper printer function that helps with debugging
+
+    Arguments: None
+
+    Returns: None
+    """
     # Get temperature, humidity, pressureasd
     temperature, humidity, pressure = BME280()
     print("\nTemperature: %0.1f C" % temperature)
@@ -135,9 +169,9 @@ def print_weather():
     wind_speed, max_wind_speed, min_wind_speed = get_wind_speed()
     print("Wind Speed: " + str(wind_speed) + "KPH\n" + "Max Wind Speed: " + str(max_wind_speed) + "KPH\n" + "Min Wind Speed: " + str(min_wind_speed) + "KPH")
 
-def run():
+def run() -> None:
     """
-    Driver function
+    Driver function. Main function that logs weather data
     """
     # Start logging
     logging.basicConfig(filename='weather.log', level=logging.INFO)
@@ -193,79 +227,34 @@ def run():
 
     # temperature
     temperature = create_feed_connection(aio, TEMERATURE_FEED)
-    # try:
-    #     temperature = aio.feeds(TEMERATURE_FEED)
-    # except RequestError: # Doesn't exist, create a new feed
-    #     feed = Feed(name=TEMERATURE_FEED)
-    #     temperature = aio.create_feed(feed)
     
     # humidity
     humidity = create_feed_connection(aio, HUMIDITY_FEED)
-    # try:
-    #     humidity = aio.feeds(HUMIDITY_FEED)
-    # except RequestError: # Doesn't exist, create a new feed
-    #     feed = Feed(name=HUMIDITY_FEED)
-    #     humidity = aio.create_feed(feed)
 
     # pressure
     pressure = create_feed_connection(aio, PRESSURE_FEED)
-    # try:
-    #     pressure = aio.feeds(PRESSURE_FEED)
-    # except RequestError: # Doesn't exist, create a new feed
-    #     feed = Feed(name=PRESSURE_FEED)
-    #     pressure = aio.create_feed(feed)
 
     # rainfall
     rainfall = create_feed_connection(aio, RAINFALL_FEED)
-    # try:
-    #     rainfall = aio.feeds(RAINFALL_FEED)
-    # except RequestError: # Doesn't exist, create a new feed
-    #     feed = Feed(name=RAINFALL_FEED)
-    #     rainfall = aio.create_feed(feed)
 
     # windspeed
     wind_speed = create_feed_connection(aio, WINDSPEED_FEED)
-    # try:
-    #     wind_speed = aio.feeds(WINDSPEED_FEED)
-    # except RequestError: # Doesn't exist, create a new feed
-    #     feed = Feed(name=WINDSPEED_FEED)
-    #     wind_speed = aio.create_feed(feed)
 
     # winddirection
     wind_direction = create_feed_connection(aio, WINDDIRECTION_FEED)
-    # try:
-    #     winddirection = aio.feeds(WINDDIRECTION_FEED)
-    # except RequestError: # Doesn't exist, create a new feed
-    #     feed = Feed(name=WINDDIRECTION_FEED)
-        # winddirection = aio.create_feed(feed)
 
     # Air quality pm1.0
     aq_pm10 = create_feed_connection(aio, AIR_QUALITY_PM10)
-    # try:
-    #     aq_pm10 = aio.feeds(AIR_QUALITY_PM10)
-    # except RequestError: # Doesn't exist, create a new feed
-    #     feed = Feed(name=AIR_QUALITY_PM10)
-    #     aq_pm10 = aio.create_feed(feed)
     
     # Air quality pm2.5
     aq_pm25 = create_feed_connection(aio, AIR_QUALITY_PM25)
-    # try:
-    #     aq_pm25 = aio.feeds(AIR_QUALITY_PM25)
-    # except RequestError: # Doesn't exist, create a new feed
-    #     feed = Feed(name=AIR_QUALITY_PM25)
-    #     aq_pm25 = aio.create_feed(feed)
 
     # Air quality pm10.0
     aq_pm100 = create_feed_connection(aio, AIR_QUALITY_PM100)
-    # try:
-    #     aq_pm100 = aio.feeds(AIR_QUALITY_PM100)
-    # except RequestError: # Doesn't exist, create a new feed
-    #     feed = Feed(name=AIR_QUALITY_PM100)
-    #     aq_pm100 = aio.create_feed(feed)
 
     logging.info("[{}] Connection to Adafruit IO established".format(datetime.now()))
 
-    
+    # CREATE SCHEDULER
     scheduler = BackgroundScheduler()
 
     # Reset functions
@@ -275,6 +264,7 @@ def run():
     scheduler.add_job(send_feed_data, 'cron', [aio, metadata,temperature, humidity, pressure, rainfall, wind_speed, wind_direction, aq_pm10, aq_pm25, aq_pm100], second=0)
 
     scheduler.start()
+
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
 
     try:

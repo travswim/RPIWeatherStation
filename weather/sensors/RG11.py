@@ -15,7 +15,7 @@ def get_RG11() -> float:
     logging.info("[{}] Got RG11 data".format(datetime.now()))
     return round(count*0.2, 2)
 
-def reset_RG11():
+def reset_RG11() -> None:
     """
     Resets the counter
 
@@ -27,7 +27,7 @@ def reset_RG11():
     count = 0
     logging.info("[{}] Reset RG11".format(datetime.now()))
 
-def button_callback(channel):
+def button_callback(channel) -> None:
     """
     Callback function to increase the rainfall counter for the RG11
     
@@ -40,9 +40,14 @@ def button_callback(channel):
     count += 1
 
 
-def RG11():
-    # import board
-    # import busio
+def RG11() -> None:
+    """
+    Calculates the amount of rainfall from the RG11
+
+    Argumetns: None
+
+    Retruns: None
+    """
     import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
     # GPIO.I2C()
     # GPIO.setwarnings(False) # Ignore warning for now
@@ -58,7 +63,7 @@ def RG11():
     GPIO.cleanup()
 
 
-def is_any_thread_alive(threads):
+def is_any_thread_alive(threads) -> bool:
     """
     Checks if there are any threads running
 

@@ -20,7 +20,7 @@ import logging
 #         return uv.uv_raw, uv.get_index(uv.uv_raw)
 
 
-def BME280():
+def BME280() -> tuple:
     """
     Gets the temperature, humidity, and pressure from the BME280 sensor
 
@@ -37,7 +37,15 @@ def BME280():
     return round(bme280.temperature,1), round(bme280.humidity, 2), round(bme280.pressure, 2)
 
 # TODO: Implement PM2.5 Air Quality Sensor when wired
-def PM25():
+def PM25() -> tuple:
+    """
+    Gets the air quality for 1.0um, 2.5um, and 10.0um
+
+    Arguments: None
+
+    Returns:
+        - pm 1.0, pm 2.5, pm 10.0
+    """
     from digitalio import DigitalInOut, Direction, Pull
     import adafruit_pm25
     reset_pin = None

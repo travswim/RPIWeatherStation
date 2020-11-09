@@ -1,6 +1,7 @@
 from time import sleep
 from datetime import datetime
 import logging
+
 def voltage_to_direction(voltage: float) -> str:
     """
     Converts an anolog voltage to a direction
@@ -34,7 +35,7 @@ def voltage_to_direction(voltage: float) -> str:
         return "NW"
 
 
-def voltage_to_degrees(voltage: float) -> str:
+def voltage_to_degrees(voltage: float) -> int:
     """
     Converts an anolog voltage to rotational degrees
 
@@ -46,7 +47,7 @@ def voltage_to_degrees(voltage: float) -> str:
     return int(voltage*360/3.3)
 
 
-def voltage():
+def voltage() -> float:
     """
     Gets the analog voltage from pin 0 on the MCP3008
 

@@ -8,7 +8,7 @@ min_wind_speed = float('inf')
 
 rotations = 0
 
-def get_wind_speed():
+def get_wind_speed() -> tuple:
     """
     Gets the current, maximum, and minimum windspeeds
 
@@ -22,7 +22,7 @@ def get_wind_speed():
     logging.info("[{}] Got wind speed RG11".format(datetime.now()))
     return round(wind_speed,2), round(max_wind_speed, 2), round(min_wind_speed,2)
 
-def reset_wind_speed():
+def reset_wind_speed() -> None:
     """
     Resets the maximum and minimum wind speeds
 
@@ -36,7 +36,7 @@ def reset_wind_speed():
     max_wind_speed = float('-inf')
     min_wind_speed = float('inf')
 
-def button_callback(channel):
+def button_callback(channel) -> None:
     """
     Callback function to increase the number of rotations of the anemometer
     
@@ -84,7 +84,7 @@ def anemometer(avg_sampling_time: int = 60) -> None:
         
     GPIO.cleanup() # Clean up
 
-def is_any_thread_alive(threads):
+def is_any_thread_alive(threads) -> bool:
     """
     Checks if there are any threads running
 
@@ -95,7 +95,7 @@ def is_any_thread_alive(threads):
     """
     return True in [t.is_alive() for t in threads]
 
-def main():
+def main() -> None:
     """
     Driver function
     """
