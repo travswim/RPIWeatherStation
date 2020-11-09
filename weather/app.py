@@ -272,7 +272,7 @@ def run():
     scheduler.add_job(reset_RG11, 'cron', hour=0)
     scheduler.add_job(reset_wind_speed, 'cron', hour=0)
     scheduler.add_job(reset_logs, 'cron', hour=0)
-    scheduler.add_job(send_feed_data, 'cron', [aio, metadata,temperature, humidity, pressure, rainfall, wind_speed, wind_direction, aq_pm10, aq_pm25, aq_pm100], minute=0)
+    scheduler.add_job(send_feed_data, 'cron', [aio, metadata,temperature, humidity, pressure, rainfall, wind_speed, wind_direction, aq_pm10, aq_pm25, aq_pm100], second=0)
 
     scheduler.start()
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
