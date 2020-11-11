@@ -45,8 +45,8 @@ REFRESH_RATE = 30
 
 # [x] TODO: Python app file/folder structure
 # [x] TODO: Integrate PM2.5 Sensor readings
-# [ ] TODO: Logging - python
-# [ ] TODO: Error handling
+# [x] TODO: Logging - python
+# [x] TODO: Error handling
 # [x] TODO: Collect weather data
 # [x] TODO: Schedule every 20s
 # [x] TODO: Reset Rainfall counter
@@ -66,19 +66,12 @@ def reset_logs() -> None:
         for i, _ in enumerate(f):
             pass
     del_lines = i+1
-    a_file = open(fname, "r")
-    lines = a_file.readlines()
-    a_file.close()
+    with open(fname, "r+") as a_file:
+        lines = a_file.readlines()
 
-    del lines[:del_lines]
-
-    new_file = open(fname, "w+")
-
-    for line in lines:
-
-        new_file.write(line)
-
-    new_file.close()
+        del lines[:del_lines]
+        a_file.truncate(0)
+        a_file.writelines(lines)
 
 def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Feed, pressure: Feed, rainfall: Feed, wind_speed: Feed, wind_direction: Feed, aq_pm10: Feed, aq_pm25: Feed, aq_pm100: Feed) -> None:
     """
@@ -117,8 +110,14 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
         aio.send_data(aq_pm100.key, pm100, metadata)
 
         # Wind direction
+        # NOTE: Sending the wind direction data (as a string: N, NE, SW, etc) sometimes fails. The implemented
+        # try catch is used to mitigate this.
         chan = voltage()
-        aio.send_data(wind_direction.key, voltage_to_direction(chan.voltage), metadata)
+        try:
+            aio.send_data(wind_direction.key, voltage_to_direction(chan.voltage), metadata)
+        except RequestError:
+            logging.error("Could not send wind direction data to Adafruit IO. continuing")
+            pass
 
         # Wind speed
         ws, _, _ = get_wind_speed()
@@ -128,7 +127,7 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
         get_RG11()
         aio.send_data(rainfall.key, get_RG11(), metadata)
         logging.info("[{}] Sensor data sent to feeds".format(datetime.now()))
-    except:
+    except RequestError:
         logging.error("Could not send data to Adafruit IO. Exiting System")
         sys.exit(1)
 
@@ -200,8 +199,6 @@ def run() -> None:
         logging.error("Could not start anemometer wind speed")
         sys.exit(1)
 
-
-    
     
     # Get environment parameters
     ADAFRUIT_IO_KEY, ADAFRUIT_IO_USERNAME, LOCATION_LATITUDE, LOCATION_LONGITUDE, LOCATION_ELEVATION = get_env()
@@ -211,7 +208,7 @@ def run() -> None:
         aio = Client(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
         logging.info("[{}] Connection to Adafruit IO established".format(datetime.now()))
 
-    except:
+    except RequestError:
         # Failing gracefully
         logging.info("[{}] Failed to connect to Adafruit IO".format(datetime.now()))
         sys.exit(1)
