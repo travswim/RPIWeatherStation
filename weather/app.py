@@ -114,7 +114,8 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
         # try catch is used to mitigate this.
         chan = voltage()
         try:
-            aio.send_data(wind_direction.key, voltage_to_direction(chan.voltage), metadata)
+            direction = voltage_to_direction(chan.voltage)
+            aio.send_data(wind_direction.key, direction, metadata)
         except RequestError:
             logging.error("Could not send wind direction data to Adafruit IO. continuing")
             pass
