@@ -111,7 +111,7 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
         aio.send_data(pressure.key, press, metadata)
         logging.info("Sent BME280 data to Adafruit IO")
     except:
-        logging.error("Could not send PM2.5 data to Adafruit IO. exiting...")
+        logging.error("Could not send BME280 data to Adafruit IO. exiting...")
         sys.exit(1)
 
     # Air quality
@@ -126,9 +126,9 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
         aio.send_data(aq_pm10.key, pm10, metadata)
         aio.send_data(aq_pm25.key, pm25, metadata)
         aio.send_data(aq_pm100.key, pm100, metadata)
-        logging.info("Sent PM2.5 data to Adafruit IO")
+        logging.info("[{}] Sent PM2.5 data to Adafruit IO".format(datetime.now()))
     except:
-        logging.error("Could not send PM2.5 data to Adafruit IO. exiting...")
+        logging.error("[{}] Could not send PM2.5 data to Adafruit IO. exiting...".format(datetime.now()))
         sys.exit(1)
 
     # Wind direction
@@ -140,14 +140,14 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
         
         logging.info("[{}] Got wind direction data".format(datetime.now()))
     except RequestError:
-        logging.error("Could not get wind direction data")
+        logging.error("[{}] Could not get wind direction data".format(datetime.now()))
         sys.exit(1)
 
     try:
         aio.send_data(wind_direction.key, direction, metadata)
-        logging.info("Sent wind direction data to Adafruit IO")
+        logging.info("[{}] Sent wind direction data to Adafruit IO".format(datetime.now()))
     except:
-        logging.error("Could not send wind direction data to Adafruit IO. exiting...")
+        logging.error("[{}] Could not send wind direction data to Adafruit IO. exiting...".format(datetime.now()))
         sys.exit(1)
     # Wind speed
     try:
@@ -159,9 +159,9 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
 
     try:
         aio.send_data(wind_speed.key, ws, metadata)
-        logging.info("Sent wind speed data to Adafruit IO")
+        logging.info("[{}] Sent wind speed data to Adafruit IO".format(datetime.now()))
     except:
-        logging.error("Could not send wind speed data to Adafruit IO. exiting...")
+        logging.error("[{}] Could not send wind speed data to Adafruit IO. exiting...".format(datetime.now()))
         sys.exit(1)
 
     # Rainfall
@@ -169,14 +169,14 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
         get_RG11()
         logging.info("[{}] Got RG11 data".format(datetime.now()))
     except:
-        logging.error("Could not get RG11 data. exiting...")
+        logging.error("[{}] Could not get RG11 data. exiting...".format(datetime.now()))
         sys.exit(1)
 
     try:
         aio.send_data(rainfall.key, get_RG11(), metadata)
         logging.info("[{}] RG11 data sent to Adafreuit IO".format(datetime.now()))
     except:
-        logging.error("Could not send RG11 data to Adafruit IO. exiting...")
+        logging.error("[{}] Could not send RG11 data to Adafruit IO. exiting...".format(datetime.now()))
         sys.exit(1)
 
    
