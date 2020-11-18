@@ -2,7 +2,7 @@ from time import sleep
 from datetime import datetime
 import busio
 import board
-import logging
+import sys
 
 # [ ] TODO: VEML UV Sensor will be incorporated when houseing is available
 # def VEML():
@@ -31,9 +31,11 @@ def BME280() -> tuple:
     """
     import adafruit_bme280
     # Create library object using our Bus I2C ports
-    i2c = busio.I2C(board.SCL, board.SDA)
-    bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c)
-    logging.info("[{}] Got BME280 sensor data".format(datetime.now()))
+    try:
+        i2c = busio.I2C(board.SCL, board.SDA)
+        bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c)
+    except RuntimeError:
+        sys.exit(1)
     return round(bme280.temperature,1), round(bme280.humidity, 2), round(bme280.pressure, 2)
 
 # TODO: Implement PM2.5 Air Quality Sensor when wired
@@ -50,16 +52,17 @@ def PM25() -> tuple:
     import adafruit_pm25
     reset_pin = None
 
-    # Create library object, use 'slow' 100KHz frequency!
-    i2c = busio.I2C(board.SCL, board.SDA, frequency=100000)
-    # Connect to a PM2.5 sensor over I2C
-    pm25 = adafruit_pm25.PM25_I2C(i2c, reset_pin)
+    
 
     try:
+        # Create library object, use 'slow' 100KHz frequency!
+        i2c = busio.I2C(board.SCL, board.SDA, frequency=100000)
+        # Connect to a PM2.5 sensor over I2C
+        pm25 = adafruit_pm25.PM25_I2C(i2c, reset_pin)
         aqdata = pm25.read()
-        logging.info("[{}] GOT PM2.5 sensor data".format(datetime.now()))
+        
     except RuntimeError:
-        print("Unable to read from sensor, retrying...")
+       sys.exit(1)
     
     return aqdata["pm10 standard"], aqdata["pm25 standard"], aqdata["pm100 standard"]
 

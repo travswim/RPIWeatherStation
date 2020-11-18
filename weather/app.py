@@ -72,6 +72,7 @@ def reset_logs() -> None:
         del lines[:del_lines]
         a_file.truncate(0)
         a_file.writelines(lines)
+    logging.info("[{}] Logging info reset".format(datetime.now()))
 
 def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Feed, pressure: Feed, rainfall: Feed, wind_speed: Feed, wind_direction: Feed, aq_pm10: Feed, aq_pm25: Feed, aq_pm100: Feed) -> None:
     """
@@ -95,42 +96,90 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
     """
 
     # SENSOR READINGS: Send data to feeds
+
+    # Temperature, humidity, pressure
     try:
-        # Temperature, humidity, pressure
         temp, hum, press = BME280()
-        
+        logging.info("[{}] Got BME280 sensor data".format(datetime.now()))
+    except:
+        logging.error("[{}] Failed to get BME280 sensor data".format(datetime.now()))
+        sys.exit(1)
+    
+    try:
         aio.send_data(temperature.key, temp, metadata)
         aio.send_data(humidity.key, hum, metadata)
         aio.send_data(pressure.key, press, metadata)
+        logging.info("Sent BME280 data to Adafruit IO")
+    except:
+        logging.error("Could not send PM2.5 data to Adafruit IO. exiting...")
+        sys.exit(1)
 
-        # Air quality
+    # Air quality
+    try:
         pm10, pm25, pm100 = PM25()
+        logging.info("[{}] Got PM2.5 sensor data".format(datetime.now()))
+    except:
+        logging.error("[{}] Failed to get PM2.5 sensor data".format(datetime.now()))
+        sys.exit(1)
+
+    try:
         aio.send_data(aq_pm10.key, pm10, metadata)
         aio.send_data(aq_pm25.key, pm25, metadata)
         aio.send_data(aq_pm100.key, pm100, metadata)
-
-        # Wind direction
-        # NOTE: Sending the wind direction data (as a string: N, NE, SW, etc) sometimes fails. The implemented
-        # try catch is used to mitigate this.
-        chan = voltage()
-        try:
-            direction = voltage_to_direction(chan.voltage)
-            aio.send_data(wind_direction.key, direction, metadata)
-        except RequestError:
-            logging.error("Could not send wind direction data to Adafruit IO. continuing")
-            pass
-
-        # Wind speed
-        ws, _, _ = get_wind_speed()
-        aio.send_data(wind_speed.key, ws, metadata)
-
-        # Rainfall
-        get_RG11()
-        aio.send_data(rainfall.key, get_RG11(), metadata)
-        logging.info("[{}] Sensor data sent to feeds".format(datetime.now()))
-    except RequestError:
-        logging.error("Could not send data to Adafruit IO. Exiting System")
+        logging.info("Sent PM2.5 data to Adafruit IO")
+    except:
+        logging.error("Could not send PM2.5 data to Adafruit IO. exiting...")
         sys.exit(1)
+
+    # Wind direction
+    # NOTE: Sending the wind direction data (as a string: N, NE, SW, etc) sometimes fails. The implemented
+    # try catch is used to mitigate this.
+    try:
+        chan = voltage()
+        direction = voltage_to_direction(chan.voltage)
+        
+        logging.info("[{}] Got wind direction data".format(datetime.now()))
+    except RequestError:
+        logging.error("Could not get wind direction data")
+        sys.exit(1)
+
+    try:
+        aio.send_data(wind_direction.key, direction, metadata)
+        logging.info("Sent wind direction data to Adafruit IO")
+    except:
+        logging.error("Could not send wind direction data to Adafruit IO. exiting...")
+        sys.exit(1)
+    # Wind speed
+    try:
+        ws, _, _ = get_wind_speed()
+        logging.info("[{}] Got wind speed data".format(datetime.now()))
+    except:
+        logging.error("[{}] Could not get wind speed data".format(datetime.now()))
+        sys.exit(1)
+
+    try:
+        aio.send_data(wind_speed.key, ws, metadata)
+        logging.info("Sent wind speed data to Adafruit IO")
+    except:
+        logging.error("Could not send wind speed data to Adafruit IO. exiting...")
+        sys.exit(1)
+
+    # Rainfall
+    try:
+        get_RG11()
+        logging.info("[{}] Got RG11 data".format(datetime.now()))
+    except:
+        logging.error("Could not get RG11 data. exiting...")
+        sys.exit(1)
+
+    try:
+        aio.send_data(rainfall.key, get_RG11(), metadata)
+        logging.info("[{}] RG11 data sent to Adafreuit IO".format(datetime.now()))
+    except:
+        logging.error("Could not send RG11 data to Adafruit IO. exiting...")
+        sys.exit(1)
+
+   
 
 
 def print_weather() -> None:
@@ -258,7 +307,7 @@ def run() -> None:
     # Reset functions
     scheduler.add_job(reset_RG11, 'cron', hour=0)
     scheduler.add_job(reset_wind_speed, 'cron', hour=0)
-    # scheduler.add_job(reset_logs, 'cron', hour=0)
+    scheduler.add_job(reset_logs, 'cron', hour=0)
     scheduler.add_job(send_feed_data, 'cron', [aio, metadata,temperature, humidity, pressure, rainfall, wind_speed, wind_direction, aq_pm10, aq_pm25, aq_pm100], second=0)
 
     scheduler.start()

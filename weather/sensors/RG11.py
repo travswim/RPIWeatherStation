@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 from time import sleep
-import logging
+
 from datetime import datetime
 count = 0
 
@@ -12,7 +12,7 @@ def get_RG11() -> float:
 
     Returns: The amount of water fallen in mm
     """
-    logging.info("[{}] Got RG11 data".format(datetime.now()))
+    
     return round(count*0.2, 2)
 
 def reset_RG11() -> None:
@@ -25,7 +25,7 @@ def reset_RG11() -> None:
     """
     global count
     count = 0
-    logging.info("[{}] Reset RG11".format(datetime.now()))
+    # logging.info("[{}] Reset RG11".format(datetime.now()))
 
 def button_callback(channel) -> None:
     """
