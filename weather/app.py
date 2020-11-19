@@ -139,16 +139,17 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
         direction = voltage_to_direction(chan.voltage)
         
         logging.info("[{}] Got wind direction data".format(datetime.now()))
-    except RequestError:
+    except:
         logging.error("[{}] Could not get wind direction data".format(datetime.now()))
         sys.exit(1)
 
+    # OSError: [Errno 24] Too many open files
     try:
         aio.send_data(wind_direction.key, direction, metadata)
         logging.info("[{}] Sent wind direction data to Adafruit IO".format(datetime.now()))
     except:
         logging.error("[{}] Could not send wind direction data to Adafruit IO. exiting...".format(datetime.now()))
-        sys.exit(1)
+        pass
     # Wind speed
     try:
         ws, _, _ = get_wind_speed()
