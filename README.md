@@ -30,8 +30,8 @@ LOCATION_LATITUDE = <latitude_of weather station>
 LOCATION_LONGITUDE = <longitude_of_weather_station>
 LOCATION_ELEVATION = <elevation_of_weather_station>
 ```
-Your username and key can be found under the `My Key` tab (hilighted in yellow)
-5. 
+Your username and key can be found under the `My Key` tab (hilighted in yellow)</br>
+4. Save your `.env` file for later
 
 ### On your PC:
 1. Insert your microSD card into your computer, and format it as FAT32 using [Windows](https://www.diskinternals.com/partition-recovery/format-sd-card-fat32-windows-10/), [macOS](https://www.easeus.com/mac-file-recovery/format-usb-flash-drive-to-fat32-on-mac.html), or [Linux](https://linuxhint.com/format_usb_drive_linux/). I would suggest using the disk utility method for both macOS and Linux if those options are available.
