@@ -1,3 +1,4 @@
+![Weather Station](images/weather_station.jpg)
 # Raspberry Pi Weather Station
 The [Raspberry Pi](https://www.raspberrypi.org/) weather station is an IoT project used to demonstrate the use of [Python](https://www.python.org/), Linux, [Adafruit IO](https://io.adafruit.com/), various meteorological sensors, and a Raspberry Pi to stream meteorological data. It uses Raspberry Pi OS (lite) and python to collect meteorological data and send it to Adafruit IO. This guide provides the code installation and setup.
 
