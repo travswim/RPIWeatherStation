@@ -147,8 +147,9 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
     try:
         aio.send_data(wind_direction.key, direction, metadata)
         logging.info("[{}] Sent wind direction data to Adafruit IO".format(datetime.now()))
-    except:
+    except RequestError as e:
         logging.error("[{}] Could not send wind direction data to Adafruit IO. exiting...".format(datetime.now()))
+        logging.error(str(e))
         pass
     # Wind speed
     try:
