@@ -20,6 +20,7 @@ When I first set out do buy a digital rain guage to replace a tipping bucket, th
 
 ## Setup and Install
 NOTE: This assumes you have correctly wired and installed your Raspberry Pi to the sensors.
+
 ### Setup Adafruit IO and your `.env` file
 1. Create an [Adafruit](https://www.adafruit.com/) account
 2. Login and Navigate to [Adafruit IO](https://io.adafruit.com/)
@@ -35,7 +36,9 @@ LOCATION_ELEVATION = <elevation_of_weather_station>
 Your username and key can be found under the `My Key` tab (hilighted in yellow)</br>
 4. Save your `.env` file for later
 
-### On your PC:
+### Headless Setup for the Raspberry Pi:
+You can either watch [this video](https://www.youtube.com/watch?v=dhY8m_Eg5iU) or use my method:
+
 1. Insert your microSD card into your computer, and format it as FAT32 using [Windows](https://www.diskinternals.com/partition-recovery/format-sd-card-fat32-windows-10/), [macOS](https://www.easeus.com/mac-file-recovery/format-usb-flash-drive-to-fat32-on-mac.html), or [Linux](https://linuxhint.com/format_usb_drive_linux/). I would suggest using the disk utility method for both macOS and Linux if those options are available.
 2. Download, install, and run [Raspberry Pi Imager](https://www.raspberrypi.org/downloads/) 
 3. Under `Operating System` Choose `Raspberry Pi OS (Other)` --> `Raspberry Pi OS (Lite)`
@@ -49,26 +52,90 @@ Your username and key can be found under the `My Key` tab (hilighted in yellow)<
 8. Eject the SD card from your computer. Insert it into the Raspberry Pi and power it on.
 
 
-## On your Raspberry Pi (via SSH)
+## Raspberry Pi Configuration (via SSH)
+Assuming you have setup the Raspberry Pi Correctly you should be able to connect to it via SSH:
+```bash
+$ ssh pi@raspberrypi.local
+```
+If this does not work, you will need to find out the IP address of the Raspbery Pi via your router. Finding this information depends on you router but should available when logged into your router. For ease of use you may want to [set a static IP address](https://pimylifeup.com/raspberry-pi-static-ip-address/) for your Raspberry Pi but this is not required.
+```bash
+$ ssh pi@XXX.XXX.XX.XXX
+```
+Defaults:
+- username: `pi`
+- password: `raspberry`
+
+Once connected to an SSH terminal instance on the Raspberry Pi:
+
+
 1. Install git
 ```bash
 $ sudo apt install git -y
 ```
-2. Configure Raspberry -Pi
-Use arrow keys, return, and tab to navigate/select
+2. Configure Raspberry Pi
+
 ```bash
 $ sudo raspi-config
 ```
-- env file
-- raspi-config
+Use `arrow keys` and `tab` to highlight, the `return key` to select</br>
+REQURIED
+- Update `raspi-config`: `Update`
+- Set network at boot: `System Options` -> `Network at Boot` -> `Yes`
+- Enable I2C: `Interface Options` -> `I2C` -> `Yes`
+- Enable SPI: `Interface Options` -> `SPI` -> `Yes`
+- Set Timezone: `Localization Options` -> `Timezone` -> [Select your timezone](https://www.timeanddate.com/time/map/)
+- Set WLAN Country: `Localization Options` -> `WLAN Country` -> [Select your WLAN Country Code](https://www.arubanetworks.com/techdocs/InstantWenger_Mobile/Advanced/Content/Instant%20User%20Guide%20-%20volumes/Country_Codes_List.htm)
+
+
+OPTIONAL:
+- Minimize GPU Memory (If you plan on only using the terminal interface and not the GUI): `Performance Options` -> `GPU Memory` -> Set it to `16`
+- Change Passowrd (Highly recommended) -> `System Options` -> `Password` -> Follow instructions
+
+3. Clone the repository
+```bash
+$ git clone https://github.com/travswim/RPIWeatherStation.git
+$ cd RPIWeatherStation/
+```
+4. Place your `.env` file that you saved earlier in RPIWeatherStation/weather/
+5. Enable and run the install script
+This will update and upgrade Raspbian OS, install Python the dependencies, and add the app as a service to `systemd` to allow it to start on reboot. The Raspberry Pi should then restart
+```bash
+$ chmod +x install.sh
+$ ./install
+```
+If you made your `.env` file correctly, you should see new feeds created in Adafruit IO:
+- temperature
+- humidity
+- rainfall
+- pressure
+- pm10
+- pm25
+- pm100
+- winddirection
+- windspeed
+
+## Creating a Dashboard on Adafruit IO
+
+Once your weather station is streaming data to the feeds, you can create a dashboard on Adafruit IO using [this guide](https://learn.adafruit.com/adafruit-io-basics-dashboards) to display sensor data.
+
+
+
 
 # Troubleshooting
-- Reset SPI and I2C if sensors stop working:
+## SPI and I2C Not Working
+Sometimes after an update the I2C and SPi will stop working. This can be solved by re-enabling them in `raspi-config`:
 ```bash
 $ sudo raspi-config
 ```
+Follow the previous setup and install instructions to enable SPi and I2C again
 
-- legal
+## Application Crash
+There is curretly a known bug that will crash the application when sending the `wind direction` to the Adafruit IO feed. While I attempt to solve the bug and apply a fix, rebooting the Raspberry Pi solves this issue:
+```bash
+$ sudo reboot
+```
+
+## [TODO]
 - contributing guidelines
 - wiki
 - CI/CD
