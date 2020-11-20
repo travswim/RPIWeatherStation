@@ -131,6 +131,22 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
         logging.error("[{}] Could not send PM2.5 data to Adafruit IO. exiting...".format(datetime.now()))
         sys.exit(1)
 
+    
+    # Wind speed
+    try:
+        ws, _, _ = get_wind_speed()
+        logging.info("[{}] Got wind speed data".format(datetime.now()))
+    except:
+        logging.error("[{}] Could not get wind speed data".format(datetime.now()))
+        sys.exit(1)
+
+    try:
+        aio.send_data(wind_speed.key, ws, metadata)
+        logging.info("[{}] Sent wind speed data to Adafruit IO".format(datetime.now()))
+    except:
+        logging.error("[{}] Could not send wind speed data to Adafruit IO. exiting...".format(datetime.now()))
+        sys.exit(1)
+
     # Wind direction
     # NOTE: Sending the wind direction data (as a string: N, NE, SW, etc) sometimes fails. The implemented
     # try catch is used to mitigate this.
@@ -156,20 +172,6 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
         except RequestError:
             logging.error("[{}] Could not send wind direction data to Adafruit IO. exiting...".format(datetime.now()))
             pass
-    # Wind speed
-    try:
-        ws, _, _ = get_wind_speed()
-        logging.info("[{}] Got wind speed data".format(datetime.now()))
-    except:
-        logging.error("[{}] Could not get wind speed data".format(datetime.now()))
-        sys.exit(1)
-
-    try:
-        aio.send_data(wind_speed.key, ws, metadata)
-        logging.info("[{}] Sent wind speed data to Adafruit IO".format(datetime.now()))
-    except:
-        logging.error("[{}] Could not send wind speed data to Adafruit IO. exiting...".format(datetime.now()))
-        sys.exit(1)
 
     # Rainfall
     try:
