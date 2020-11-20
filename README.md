@@ -5,8 +5,10 @@ The [Raspberry Pi](https://www.raspberrypi.org/) weather station is an IoT proje
 
 
 ## Background & Objectives
-You can read about why I made this project here
+You can read about why I made this project [here](BACKGROUND.md)
 
+## Contributing
+See [here](CONTRIBUTING.md)
 
 ## Bill of Materials and Tools
 The excel spreadsheet contains all the materials, tools, and hardware used to assemble the weather station. Some updates are also provided here:
@@ -119,8 +121,6 @@ If you made your `.env` file correctly, you should see new feeds created in Adaf
 Once your weather station is streaming data to the feeds, you can create a dashboard on Adafruit IO using [this guide](https://learn.adafruit.com/adafruit-io-basics-dashboards) to display sensor data.
 
 
-
-
 # Troubleshooting
 ## SPI and I2C Not Working
 Sometimes after an update the I2C and SPi will stop working. This can be solved by re-enabling them in `raspi-config`:
@@ -135,8 +135,12 @@ There is curretly a known bug that will crash the application when sending the `
 $ sudo reboot
 ```
 
+## Updates
+
+
+## References
+
 ## [TODO]
-- contributing guidelines
 - wiki
 - CI/CD
 - finish testing
