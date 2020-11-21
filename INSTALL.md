@@ -13,6 +13,8 @@ LOCATION_LONGITUDE = <longitude_of_weather_station>
 LOCATION_ELEVATION = <elevation_of_weather_station>
 ```
 Your username and key can be found under the `My Key` tab (hilighted in yellow)</br>
+![Weather Station](images/adafruit_io.jpg)
+</br>
 4. Save your `.env` file for later
 
 ---
@@ -93,3 +95,7 @@ If you made your `.env` file correctly, you should see new feeds created in Adaf
 - pm100
 - winddirection
 - windspeed
+---
+## Creating a Dashboard on Adafruit IO
+
+Once your weather station is streaming data to the feeds, you can create a dashboard on Adafruit IO using [this guide](https://learn.adafruit.com/adafruit-io-basics-dashboards) to display sensor data.

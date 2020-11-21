@@ -30,10 +30,7 @@ NOTE: This assumes you have correctly wired your Raspberry Pi to the sensors.
 
 See the [Install page](INSTALL.md)
 
----
-## Creating a Dashboard on Adafruit IO
 
-Once your weather station is streaming data to the feeds, you can create a dashboard on Adafruit IO using [this guide](https://learn.adafruit.com/adafruit-io-basics-dashboards) to display sensor data.
 
 ---
 # Troubleshooting
