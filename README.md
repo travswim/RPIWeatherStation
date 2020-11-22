@@ -14,7 +14,7 @@ See [here](CONTRIBUTING.md)
 
 ---
 ## Bill of Materials and Tools
-The [excel spreadsheet](WeatherPi_BOM.xlsx) contains all the materials, tools, and hardware used to assemble the weather station. Some hardware/sensor improvements are provided here:
+This [Google Sheet](https://docs.google.com/spreadsheets/d/1kITqek3yLI9NMS-gQCwhuHgNykaOrIz1MKBfJmgWq-s/edit?usp=sharing) contains all the materials, tools, and hardware used to assemble the weather station. Some hardware/sensor improvements are provided here:
 </br></br>
 ### UPDATE - Hydreon RG-15
 When I first set out do buy a digital rain guage to replace a tipping bucket, the best option that stood out was the [Hydreon RG-11](https://rainsensors.com/products/rg-11/). Since completing this project, Hydreon has come out with a better version of their digital rain gauge called the [RG-15](https://rainsensors.com/products/rg-15/). Although being more expensive than the RG-11, it is specifically designed to be a digital solution to replace the tipping-bucket, and is more accurate (± 10%) than the RF-11 (± 36% 2/3 of the time).
