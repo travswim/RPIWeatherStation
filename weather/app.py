@@ -154,7 +154,8 @@ def send_feed_data(aio: Client, metadata: dict, temperature: Feed, humidity: Fee
         chan = voltage()
         direction = voltage_to_direction(chan.voltage)
         
-        logging.info("[{}] Got wind direction data".format(datetime.now()))
+        logging.info("[{}] Got wind direction data:".format(datetime.now()))
+        logging.info("Voltage: {}, Direction: {}".format(chan, direction))
     except:
         logging.error("[{}] Could not get wind direction data".format(datetime.now()))
         sys.exit(1)
