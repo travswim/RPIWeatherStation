@@ -6,7 +6,8 @@ def voltage_to_direction(voltage: float) -> str:
     """
     Converts an anolog voltage to a direction
 
-    Arguments: None
+    Arguments:
+        - voltage: Voltage float value form the MCP3008. values are between 0 and 3.3V
 
     Returns:
         - Direction coresponding to an input voltage
