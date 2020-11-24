@@ -1,6 +1,7 @@
 from time import sleep
 from datetime import datetime
-
+import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
+import threading
 # Global Vars
 wind_speed = 0
 max_wind_speed = float('-inf')
@@ -56,7 +57,7 @@ def anemometer(avg_sampling_time: int = 60) -> None:
 
     Retruns: None
     """
-    import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
+    
     # GPIO.setwarnings(False) # Ignore warning for now
     GPIO.setmode(GPIO.BCM) # Use physical pin numbering
     GPIO.setup(14, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 8 to be an input pin and set initial value to be pulled low (off)
@@ -99,7 +100,7 @@ def main() -> None:
     """
     Driver function
     """
-    import threading
+    
     run_anemometer = threading.Thread(target=anemometer, name="Anemometer", daemon=True)
     run_anemometer.start()
     # anemometer()

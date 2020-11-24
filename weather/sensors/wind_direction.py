@@ -1,6 +1,11 @@
 from time import sleep
 from datetime import datetime
 import sys
+import busio
+import digitalio
+import board
+import adafruit_mcp3xxx.mcp3008 as MCP
+from adafruit_mcp3xxx.analog_in import AnalogIn
 
 def voltage_to_direction(voltage: float) -> str:
     """
@@ -57,11 +62,7 @@ def voltage() -> float:
     Returns:
         - The analog voltage
     """
-    import busio
-    import digitalio
-    import board
-    import adafruit_mcp3xxx.mcp3008 as MCP
-    from adafruit_mcp3xxx.analog_in import AnalogIn
+    
     
     try:
         # create the spi bus

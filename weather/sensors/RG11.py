@@ -1,7 +1,9 @@
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 from time import sleep
-
+import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 from datetime import datetime
+import threading
+
 count = 0
 
 def get_RG11() -> float:
@@ -48,7 +50,7 @@ def RG11() -> None:
 
     Retruns: None
     """
-    import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
+    
     # GPIO.I2C()
     # GPIO.setwarnings(False) # Ignore warning for now
     GPIO.setmode(GPIO.BCM)
@@ -78,7 +80,7 @@ def main():
     """
     Driver function
     """
-    import threading
+    
     run_RG11 = threading.Thread(target=RG11, name="RG11", daemon=True)
     run_RG11.start()
     

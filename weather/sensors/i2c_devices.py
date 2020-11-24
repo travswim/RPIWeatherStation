@@ -3,6 +3,9 @@ from datetime import datetime
 import busio
 import board
 import sys
+import adafruit_bme280
+from digitalio import DigitalInOut, Direction, Pull
+import adafruit_pm25
 
 # [ ] TODO: VEML UV Sensor will be incorporated when houseing is available
 # def VEML():
@@ -29,7 +32,7 @@ def BME280() -> tuple:
     Returns:
         - temperature, humidity, pressure of the sensor as a tuple: (temperature, humidity, pressure)
     """
-    import adafruit_bme280
+
     # Create library object using our Bus I2C ports
     try:
         i2c = busio.I2C(board.SCL, board.SDA)
@@ -48,8 +51,7 @@ def PM25() -> tuple:
     Returns:
         - pm 1.0, pm 2.5, pm 10.0
     """
-    from digitalio import DigitalInOut, Direction, Pull
-    import adafruit_pm25
+    
     reset_pin = None
 
     
